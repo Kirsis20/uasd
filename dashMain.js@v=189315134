@@ -1,0 +1,923 @@
+﻿
+var isMantenimiento = false;
+var Clic = false;
+
+$(document).keypress(function (e) {
+    if (e.which == 13)
+    {
+        $("#btnlogin").trigger("click");
+    }
+});
+
+
+
+
+function alerta_error(texto)
+{
+   mensaje("<b><i class='icon-ban-circle'></i>&nbsp;"+texto+"</b>");
+}
+
+function alerta_loading()
+{
+    loadinga();
+}
+
+function alerta_success(texto)
+{
+    mensaje("<b><i class='icon-spinner icon-spin green bigger-125'/>&nbsp;"+texto+"</b>");
+}
+
+function changeCatpcha()
+{
+        d = new Date();
+        $("#Image1").attr("src", "Captcha.aspx?" + d.getTime());
+}
+
+function limpiador(texto) {
+    return texto.replace(/[^a-z0-9\s]/gi, '');
+}
+
+function login() {
+    
+    var txtidbanner = $("#txtidbanner").val();
+    var txtpassword = encodeURI($("#txtpassword").val());
+    var captcha = $("#txtcaptcha").val();
+
+    if (txtidbanner == "")
+    {
+        alerta_error("ID Banner incompleto.");
+        $("#txtidbanner").focus();
+        $("#Image1").trigger("click");
+        return;
+    }
+
+    if (txtidbanner.length < 6)
+    {
+        alerta_error("ID Banner incompleto.");
+        $("#txtidbanner").focus();
+        $("#Image1").trigger("click");
+        return;
+    }
+    if (txtpassword == "")
+    {
+        alerta_error("Contraseña incompleta.");
+        $("#txtpassword").focus();
+        $("#Image1").trigger("click");
+        return;
+    }
+    if (captcha == "")
+    {
+        alerta_error("C&oacute;digo incompleto.");
+        $("#txtcaptcha").focus();
+        $("#Image1").trigger("click");
+        return;
+    }
+
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/Login",
+        data: "{'txtidbanner':'" + txtidbanner + "','txtpassword':'" + txtpassword + "','captcha':'" + captcha + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+            var datos = (typeof response.d) == 'string' ? eval('(' + response.d + ')') : response.d;
+            var p = 0;
+            if (datos[0].response == 1)
+            {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+            if (datos[0].response == 2)
+            {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+            if (datos[0].response == 3) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+                
+            if (datos[0].response == 0)
+            {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+            if (datos[0].response == 777)
+            {
+                show_box('succeslogin');
+                $("#hnombreapellido").empty().append(datos[0].NOMBRE +" "+datos[0].APELLIDO);
+                $("#hidbanner").empty().append(datos[0].MATRICULA);
+                var idbanner = datos[0].MATRICULA;
+                if (idbanner.substring(0,1) == "P")
+                {
+                    $("#btnEditarDatos").hide();
+                }
+                if (idbanner.substring(0, 1) != "P") {
+                    $("#btnEditarDatos").show();
+                }
+                $("#txtTelefono").val(datos[0].TELEFONO);
+                $("#txtCelular").val(datos[0].CELULAR);
+                if (datos[0].EMAIL == "")
+                {
+                    $("#txtEmailPersonal").val("");
+                }
+                else
+                {
+                    var em = datos[0].EMAIL;
+                    var dat = em.split(",");
+                    $("#txtEmailPersonal").val(dat[0]);
+                }
+
+                $("#txtEmailPersonal").val(datos[0].EMAIL);
+                $("#hddSecuenciaDireccion").val(datos[0].SECUENCIA_DIRECCION);
+                $("#hddSecuenciaTelefono").val(datos[0].SECUENCIA_TELEFONO);
+              /*  if (datos[0].CEDULA != "") {
+                    $("#ImgCedula1").attr("src", "https://soft2.uasd.edu.do/ImagenSRC/?cedula=" + datos[0].CEDULA + "");
+                }
+                else
+                {
+                    $("#ImgCedula1").attr("src", "https://soft2.uasd.edu.do/ImagenSRC/?cedula=0");
+                }*/
+                if (datos[0].ASIGNATURAS[0].response == 0) {
+                    $("#divAsignaturaDAta, #divAsignaturaSVDAta").hide();
+                }
+
+                if (datos[0].ASIGNATURAS[0].response == 777)
+                {
+                    // Contador de asignaturas virtuales y semipresenciales
+                    let sv = 0;
+
+                    $("#divAsignaturaDAta").show();
+
+                    var cod = datos[0].MATRICULA;
+                    $("#tblAsignaturas, #tblAsignaturasSV").empty();
+
+                    if (cod.substring(0, 1) == "p" || cod.substring(0, 1) == "P")
+                    {
+                        if(datos)
+                        $("#tblAsignaturas").append('<tr>\
+                                                    <td scope="row">INDUCCI&Oacute;N</td>\
+                                                    <td>INDUCCI&Oacute;N DOCENTE ' + datos[0].ASIGNATURAS[p].FACULTAD + '</td>\
+                                                    <td><a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'INDUCCION-DOCENTE-" + datos[0].ASIGNATURAS[p].FACULTAD + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a></td>\
+                                                    </tr>');
+                    }
+
+                    let clave = [];
+                    let claveSV = [];
+
+                    for (var p in datos[0].ASIGNATURAS)
+                    {
+                        var mat = datos[0].MATRICULA;
+                        if (mat.substring(0, 1) == "P")
+                        {
+                            
+                            if ((datos[0].ASIGNATURAS[p].SECCION.charAt(0) == "W" || datos[0].ASIGNATURAS[p].SECCION.charAt(0) == "Z")
+                                && datos[0].ASIGNATURAS[p].SECCION.length >= 3)
+                            {
+                                let direccion = "https://aulavirtual.uasd.edu.do/login/wsuasd.php";
+                                let estaListadaSV = claveSV.includes(datos[0].ASIGNATURAS[p].CLAVE);
+                                if (!estaListadaSV) {
+                                    $("#tblAsignaturasSV").append('<tr>\
+                                                        <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                        <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                        <td>\
+                                                            <a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + direccion + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a>\
+                                                        </td>\
+                                                        </tr>');
+                                }
+                                sv += 1;
+                                claveSV.push(datos[0].ASIGNATURAS[p].CLAVE);
+                            }
+                            else
+                            {
+                                let estaListada = clave.includes(datos[0].ASIGNATURAS[p].CLAVE);
+                                if (!estaListada)
+                                {
+                                    $("#tblAsignaturas").append('<tr>\
+                                                        <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                        <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                        <td>\
+                                                            <a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a>\
+                                                        </td>\
+                                                        </tr>');
+                                }
+                                clave.push(datos[0].ASIGNATURAS[p].CLAVE);
+                            }
+
+                            var crns = datos[0].ASIGNATURAS[p].CRN;
+                            var secs = datos[0].ASIGNATURAS[p].SECCION;
+                            var arraycrns = crns.split(",");
+                            var arraysecs = secs.split(",");
+
+                            for (var t in arraycrns)
+                            {
+                                $("#dropdown" + p).append('<a onclick="ListStudentsByAsignature(' + "'" + arraycrns[t] + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].PERIODO + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].ASIGNATURA + ' (' + datos[0].ASIGNATURAS[p].CLAVE + ') | Sec.:' + arraysecs[t] + "'" + ')"  class="dropdown-item" href="#">' + datos[0].ASIGNATURAS[p].ASIGNATURA + ', Sec.: ' + arraysecs[t] + '</a>');
+                            }
+                        }
+
+                        if (mat.substring(0, 1) != "P")
+                        {
+                            $("#tblAsignaturas").append('<tr>\
+                                                        <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                        <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                        <td><a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a></td>\
+                                                        </tr>');
+                        }
+                    }
+
+                    if (sv > 0) {
+                        $("#divAsignaturaSVDAta").show();
+                    } else {
+                        $("#divAsignaturaSVDAta").hide();
+                    }
+
+                    if (datos[0].COMPLETE_IND == 0)
+                    {
+                        $("#divEditData").show();
+                        $("#divAsignaturaDAta").hide();
+
+                        if (datos[0].PROVINCIA != "0")
+                        {
+                            $("#cbbProvincia").val(datos[0].PROVINCIA);
+                        }
+                        else
+                        {
+                            $("#cbbProvincia").val("0");
+                        }
+
+                        if (datos[0].PROVINCIA != "0")
+                        {
+                            getMunicipio(datos[0].MUNICIPIO)
+                        }
+                    }
+
+                    if (datos[0].COMPLETE_IND == 1)
+                    {
+                        $("#divEditData").hide();
+                        $("#divAsignaturaDAta").show();
+                    }
+                }
+                loadingc();
+            }
+
+            if (datos[0].response == 666) 
+            {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+        },
+        error: function (result) 
+        {
+            loadingc();
+            mensaje("Intentelo mas tarde");
+            return;
+        }
+    });
+}
+
+function PostBackLogin()
+{
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/Login",
+        data: "{'txtidbanner':'" + "" + "','txtpassword':'" + "" + "','captcha':'" + "" + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+            var datos = (typeof response.d) == 'string' ? eval('(' + response.d + ')') : response.d;
+            var p = 0;
+            if (datos[0].response == 1) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+            if (datos[0].response == 2) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+            if (datos[0].response == 3) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+
+            if (datos[0].response == 0) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+            if (datos[0].response == 777) {
+                show_box('succeslogin');
+                $("#hnombreapellido").append(datos[0].NOMBRE + " " + datos[0].APELLIDO);
+                $("#hidbanner").append(datos[0].MATRICULA);
+
+               /* if (datos[0].CEDULA != "") {
+                    $("#ImgCedula1").attr("src", "https://soft2.uasd.edu.do/ImagenSRC/?cedula=" + datos[0].CEDULA + "");
+                }
+                else {
+                    $("#ImgCedula1").attr("src", "https://soft2.uasd.edu.do/ImagenSRC/?cedula=0");
+                }*/
+
+                if (datos[0].ASIGNATURAS[0].response == 777) {
+                    // Contador de asignaturas virtuales y semipresenciales
+                    let sv = 0;
+
+                    $("#divAsignaturaDAta").show();
+
+                    var cod = datos[0].MATRICULA;
+                    $("#tblAsignaturas, #tblAsignaturasSV").empty();
+
+                    if (cod.substring(0, 1) == "p" || cod.substring(0, 1) == "P") {
+                        if (datos)
+                            $("#tblAsignaturas").append('<tr>\
+                                                    <td scope="row">INDUCCI&Oacute;N</td>\
+                                                    <td>INDUCCI&Oacute;N DOCENTE ' + datos[0].ASIGNATURAS[p].FACULTAD + '</td>\
+                                                    <td><a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'INDUCCION-DOCENTE-" + datos[0].ASIGNATURAS[p].FACULTAD + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a></td>\
+                                                    </tr>');
+                    }
+
+                    let clave = [];
+                    let claveSV = [];
+
+                    for (var p in datos[0].ASIGNATURAS) {
+                        var mat = datos[0].MATRICULA;
+                        if (mat.substring(0, 1) == "P") {
+                            if ((datos[0].ASIGNATURAS[p].SECCION.charAt(0) == "W" || datos[0].ASIGNATURAS[p].SECCION.charAt(0) == "Z")
+                                && datos[0].ASIGNATURAS[p].SECCION.length >= 3)
+                            {
+                                let direccion = "https://aulavirtual.uasd.edu.do/login/wsuasd.php";
+                                let estaListadaSV = claveSV.includes(datos[0].ASIGNATURAS[p].CLAVE);
+                                if (!estaListadaSV)
+                                {
+                                    $("#tblAsignaturasSV").append('<tr>\
+                                                        <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                        <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                        <td>\
+                                                            <a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + direccion + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a>\
+                                                        </td>\
+                                                        </tr>');
+                                }
+                                sv += 1;
+                                claveSV.push(datos[0].ASIGNATURAS[p].CLAVE);
+                            }
+                            else {
+                                let estaListada = clave.includes(datos[0].ASIGNATURAS[p].CLAVE);
+                                if (!estaListada)
+                                {
+                                    $("#tblAsignaturas").append('<tr>\
+                                                            <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                            <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                            <td>\
+                                                                <a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a>\
+                                                            </td>\
+                                                            </tr>');
+                                }
+                                clave.push(datos[0].ASIGNATURAS[p].CLAVE);
+                            }
+
+                            var crns = datos[0].ASIGNATURAS[p].CRN;
+                            var secs = datos[0].ASIGNATURAS[p].SECCION;
+                            var arraycrns = crns.split(",");
+                            var arraysecs = secs.split(",");
+
+                            for (var t in arraycrns) {
+                                $("#dropdown" + p).append('<a onclick="ListStudentsByAsignature(' + "'" + arraycrns[t] + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].PERIODO + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].ASIGNATURA + ' (' + datos[0].ASIGNATURAS[p].CLAVE + ') | Sec.:' + arraysecs[t] + "'" + ')"  class="dropdown-item" href="#">' + datos[0].ASIGNATURAS[p].ASIGNATURA + ', Sec.: ' + arraysecs[t] + '</a>');
+                            }
+                        }
+
+                        if (mat.substring(0, 1) != "P") {
+                            $("#tblAsignaturas").append('<tr>\
+                                                        <td scope="row">' + datos[0].ASIGNATURAS[p].CLAVE + '</td>\
+                                                        <td>'+ datos[0].ASIGNATURAS[p].ASIGNATURA + '</td>\
+                                                        <td><a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].CLAVE + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].ASIGNATURAS[p].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a></td>\
+                                                        </tr>');
+                        }
+                    }
+
+                    if (sv > 0) {
+                        $("#divAsignaturaSVDAta").show();
+                    } else {
+                        $("#divAsignaturaSVDAta").hide();
+                    }
+
+                    if (datos[0].COMPLETE_IND == 0) {
+                        $("#divEditData").show();
+                        $("#divAsignaturaDAta").hide();
+
+                        if (datos[0].PROVINCIA != "0") {
+                            $("#cbbProvincia").val(datos[0].PROVINCIA);
+                        }
+                        else {
+                            $("#cbbProvincia").val("0");
+                        }
+
+                        if (datos[0].PROVINCIA != "0") {
+                            getMunicipio(datos[0].MUNICIPIO)
+                        }
+                    }
+
+                    if (datos[0].COMPLETE_IND == 1) {
+                        $("#divEditData").hide();
+                        $("#divAsignaturaDAta").show();
+                    }
+                }
+                loadingc();
+            }
+
+            if (datos[0].response == 666) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+        },
+        error: function (result) {
+            loadingc();
+            mensaje("Intentelo mas tarde");
+            return;
+        }
+    });
+}
+
+function TraerSeleccion(periodo) {
+
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/SeleccionAsignaturas",
+        data: "{'periodo':'" + periodo + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+            
+            var datos = (typeof response.d) == 'string'
+                ? eval('(' + response.d + ')')
+                : response.d;
+
+            var p = 0;            
+
+            if (datos[0].response == 3)
+            {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                $("#Image1").trigger("click");
+                return;
+            }
+
+            if (datos[0].response == 0)
+            {
+                $("#divAsignaturaDAta, #divAsignaturaSVDAta").hide();
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+            if (datos[0].response == 777)
+            {
+                // Contador de asignaturas virtuales y semipresenciales
+                let sv = 0;
+
+                $("#divAsignaturaDAta").show();
+                $("#divAsignaturaSVDAta").hide();
+
+                var cod = datos[0].MATRICULA;
+
+                $("#tblAsignaturas, #tblAsignaturasSV").empty();
+
+                if (cod.substring(0, 1) == "p" || cod.substring(0, 1) == "P")
+                {
+                    $("#tblAsignaturas").append('<tr>\
+                                                    <td scope="row">INDUCCI&Oacute;N</td>\
+                                                    <td>INDUCCI&Oacute;N DOCENTE ' + datos[0].FACULTAD + '</td>\
+                                                    <td><a style="cursor:pointer;" onclick="SendData(' + "'" + datos[0].MATRICULA + "'" + ',' + "'INDUCCION-DOCENTE-" + datos[0].FACULTAD + "'" + ',' + "'" + datos[0].TOKEN + "'" + ',' + "'" + datos[0].URL + "'" + ',' + "'" + datos[0].MATRICULA2 + "'" + ')" ><img class="pull-right" src="images/boton_ver_mas.svg"></a></td>\
+                                                    </tr>');
+                }
+
+                let clave = [];
+                let claveSV = [];
+                for (let i = 0; i < datos.length; i++)
+                {
+                    var mat = datos[i].MATRICULA;
+
+                    if (mat.substring(0, 1) == "P")
+                    {
+                        if ((datos[i].SECCION.charAt(0) == "W" || datos[i].SECCION.charAt(0) == "Z") && datos[i].SECCION.length >= 3)
+                        {
+                            //let direccion = "https://aulavirtual.uasd.edu.do/login/wsuasd.php";
+                            let estaListadaSV = claveSV.includes(datos[i].CLAVE);
+                            if (!estaListadaSV)
+                            {
+                                $("#tblAsignaturasSV").append(`<tr>
+                                <td scope="row">${datos[i].CLAVE}</td>
+                                <td>${datos[i].ASIGNATURA}</td>
+                                <td>
+                                    <a style="cursor:pointer;" onclick="SendData('${datos[i].MATRICULA}','${datos[i].CLAVE}','${datos[i].TOKEN}','${datos[i].URL}','${datos[i].MATRICULA2}')" >
+                                        <img class="pull-right" src="images/boton_ver_mas.svg">
+                                    </a>
+                                </td>\
+                            </tr>`);
+                            }
+                            sv += 1;
+                            claveSV.push(datos[i].CLAVE)
+                        }
+                        else
+                        {
+                            let estaListada = clave.includes(datos[i].CLAVE);
+                            if (!estaListada)
+                            {
+                                $("#tblAsignaturas").append(`<tr>
+                                    <td scope="row">${datos[i].CLAVE}</td>
+                                    <td>${datos[i].ASIGNATURA}</td>
+                                    <td>
+                                        <a style="cursor:pointer;" onclick="SendData('${datos[i].MATRICULA}','${datos[i].CLAVE}','${datos[i].TOKEN}','${datos[i].URL2}','${datos[i].MATRICULA2}')" >
+                                            <img class="pull-right" src="images/boton_ver_mas.svg">
+                                        </a>
+                                    </td>\
+                                </tr>`);
+                            }
+                            clave.push(datos[i].CLAVE);
+                        }
+                        var crns = datos[i].CRN;
+                        var secs = datos[i].SECCION;
+                        var arraycrns = crns.split(",");
+                        var arraysecs = secs.split(",");
+
+                        for (var t in arraycrns) {
+                            $("#dropdown" + p).append('<a onclick="ListStudentsByAsignature(' + "'" + arraycrns[t] + "'" + ',' + "'" + datos[i].PERIODO + "'" + ',' + "'" + datos[i].ASIGNATURA + ' (' + datos[i].CLAVE + ') | Sec.:' + arraysecs[t] + "'" + ')"  class="dropdown-item" href="#">' + datos[i].ASIGNATURA + ', Sec.: ' + arraysecs[t] + '</a>');
+                        }
+                    }
+                    if (mat.substring(0, 1) != "P") {
+                        $("#tblAsignaturas").append(`<tr>
+                            <td scope="row">${datos[i].CLAVE}</td>
+                            <td>${datos[i].ASIGNATURA}</td>
+                            <td>
+                                <a style="cursor:pointer;" onclick="SendData('${datos[i].MATRICULA}','${datos[i].CLAVE}','${datos[i].TOKEN}','${datos[i].URL}','${datos[i].MATRICULA2}')" >
+                                    <img class="pull-right" src="images/boton_ver_mas.svg">
+                                </a>
+                            </td>
+                        </tr>`);
+                    }
+                }
+
+                if (sv > 0) {
+                    $("#divAsignaturaSVDAta").show();
+                } else {
+                    $("#divAsignaturaSVDAta").hide();
+                }
+            }
+
+            loadingc();
+
+            if (datos[0].response == 666) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+        },
+        error: function (result) {
+            loadingc();
+            mensaje("Intentelo mas tarde");
+            return;
+        }
+    });
+}
+
+function SendData(idbanner, clave, token, url, idbanner2)
+{
+    $("#idu").val(idbanner);
+    $("#idu2").val(idbanner2);
+    $("#course").val(clave);
+    $("#tk").val(token);
+    $("#frmDatos").attr("action", url);
+    $("#frmDatos").submit();
+}
+
+function Logout()
+{
+    location.href = "Logout.aspx";
+}
+
+function CallModalEdit()
+{
+    $("#mensajedataedit").modal({
+        show:true
+    })
+}
+
+function SaveDataEdit()
+{
+    var email = $("#txtEmailPersonal").val();
+    var celular = $("#txtCelular").val();
+    var telefono = $("#txtTelefono").val();
+    var provincia = $("#cbbProvincia").val();
+    var municipio = $("#cbbMunicipio").val();
+
+    console.log(provincia);
+    console.log(municipio);
+
+    if (provincia == "0" || provincia == null) {
+        ShowAlertMessage("Debes de indicar la provincia.");
+        $("#cbbProvincia").removeClass("is-valid").addClass("is-invalid");
+        $("#cbbProvincia").focus();
+        return;
+    }
+    $("#cbbProvincia").removeClass("is-invalid").addClass("is-valid");
+    $("#divAlertas").empty();
+
+    if (municipio == "0" || municipio == null) {
+        ShowAlertMessage("Debes de indicar el municipio.");
+        $("#cbbMunicipio").removeClass("is-valid").addClass("is-invalid");
+        $("#cbbMunicipio").focus();
+        return;
+    }
+    $("#cbbMunicipio").removeClass("is-invalid").addClass("is-valid");
+    $("#divAlertas").empty();
+
+    if(email == "")
+    {
+        ShowAlertMessage("El correo personal no puede estar vacío");
+        $("#txtEmailPersonal").removeClass("is-valid").addClass("is-invalid");
+        $("#txtEmailPersonal").focus();
+        return;
+    }
+    var status = isMail(email);
+    if (status == false)
+    {
+        ShowAlertMessage("El correo: <b>"+email+"</b> no es válido, por favor introduzca un correo válido");
+        $("#txtEmailPersonal").removeClass("is-valid").addClass("is-invalid");
+        $("#txtEmailPersonal").focus();
+        return;
+    }
+    $("#txtEmailPersonal").removeClass("is-invalid").addClass("is-valid");
+    $("#divAlertas").empty();
+
+    if (telefono == "") {
+        ShowAlertMessage("El teléfono no puede estar vacío");
+        $("#txtTelefono").removeClass("is-valid").addClass("is-invalid");
+        $("#txtTelefono").focus();
+        return;
+    }
+    if (telefono.length != 12) {
+        ShowAlertMessage("El teléfono está incompleto");
+        $("#txtTelefono").removeClass("is-valid").addClass("is-invalid");
+        $("#txtTelefono").focus();
+        return;
+    }
+    $("#txtTelefono").removeClass("is-invalid").addClass("is-valid");
+    $("#divAlertas").empty();
+
+    if (celular == "") {
+        ShowAlertMessage("El celular no puede estar vacío");
+        $("#txtCelular").removeClass("is-valid").addClass("is-invalid");
+        $("#txtCelular").focus();
+        return;
+    }
+    if (celular.length != 12) {
+        ShowAlertMessage("El celular está incompleto");
+        $("#txtCelular").removeClass("is-valid").addClass("is-invalid");
+        $("#txtCelular").focus();
+        return;
+    }
+    $("#txtCelular").removeClass("is-invalid").addClass("is-valid");
+    $("#divAlertas").empty();
+
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/SaveDataEditForm",
+        data: "{'email':'" + email + "','telefono':'" + telefono + "','celular':'" + celular + "','provincia':'" + provincia + "','municipio':'" + municipio + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+            var datos = (typeof response.d) == 'string' ? eval('(' + response.d + ')') : response.d;
+            var p = 0;
+            if (datos[0].response == 0)
+            {
+                loadingc();
+                ShowAlertMessage(datos[0].mensaje);
+                return;
+            }
+            if (datos[0].response == 1) {
+                loadingc();
+                ShowAlertMessage(datos[0].mensaje);
+                $("#txtEmailPersonal").removeClass("is-valid").addClass("is-invalid");
+                $("#txtEmailPersonal").focus();
+                return;
+            }
+
+            if (datos[0].response == 777)
+            {
+                $('#mensajedataedit').modal('hide');
+                mensaje(datos[0].mensaje);
+                $("#txtEmailPersonal").removeClass("is-valid");
+                $("#txtTelefono").removeClass("is-valid");
+                $("#txtCelular").removeClass("is-valid");
+                loadingc();
+                login();
+            }
+
+            if (datos[0].response == 666) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+                return;
+            }
+
+        },
+        error: function (result) {
+            loadingc();
+            mensaje("Intentelo mas tarde");
+            return;
+        }
+    });
+
+}
+
+function ShowAlertMessage(texto)
+{
+    $("#divAlertas").empty().append(' <div class="alert alert-danger alert-dismissible fade show" role="alert">\
+                                            <i class="fa fa-warning"></i> '+ texto + '\
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">\
+                                            <span aria-hidden="true">&times;</span>\
+                                            </button>\
+                                       </div>');
+    
+}
+
+function ListStudentsByAsignature(crn,periodo,nombre)
+{
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/ListStudentsByAsignature",
+        data: "{'crn':'" + crn + "','periodo':'" + periodo + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+            var datos = (typeof response.d) == 'string' ? eval('(' + response.d + ')') : response.d;
+            var p = 0;
+            if (datos[0].response == 777)
+            {
+                $("#modalheaderListStudents").empty().append('<h5 class="modal-title" ><i class="fa fa-users"></i>&nbsp;' + nombre + ' | ' + periodo.substring(0,4)+'-'+periodo.substring(4,2)+ '</h5>\
+                                                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+                                                                  <i class="fa fa-close"></i>\
+                                                              </button>');
+                $("#divBodyTable").empty().append('<table class="table table-bordered table-condensed table-stripped" id="tblDatosEstudiantes">\
+                                                       <thead>\
+                                                            <tr>\
+                                                                <th>Matrícula</th>\
+                                                                <th>Nombre (s) Apellido (s)</th>\
+                                                                <th>Correo</th>\
+                                                                <th>Teléfono</th>\
+                                                                <th>Celular</th>\
+                                                            </tr>\
+                                                       </thead>\
+                                                       <tbody>\
+                                                       </tbody>\
+                                                   </table>');
+                for(var z in datos)
+                {
+                    $("#tblDatosEstudiantes").append('<tr>\
+                                                            <td>'+datos[z].MATRICULA+'</td>\
+                                                            <td>'+datos[z].NOMBRE+'</td>\
+                                                            <td>'+datos[z].CORREO+'</td>\
+                                                            <td>'+datos[z].TELEFONO+'</td>\
+                                                            <td>'+datos[z].CELULAR+'</td>\
+                                                        </tr>');
+                }
+                $('#tblDatosEstudiantes').DataTable({
+                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                    //"Dom": '<"top"i>rt<"bottom"flp><"clear">',
+                    language: {
+                        buttons: {
+                            copyTitle: 'Copiado al Portapapeles',
+                            copySuccess: {
+                                _: '%d Filas Copiadas',
+                                1: '1 Fila Copiada'
+                            }
+                        },
+                        lengthMenu: "Mostrar _MENU_ &nbsp;Registros",
+                        processing: "Procesando...",
+                        search: "Filtrar&nbsp;:",
+                        info: "Mostrando _START_ A _END_ De _TOTAL_ Registros",
+                        infoEmpty: "Mostrando 0 to 0 De 0 Registros",
+                        infoFiltered: "(Filtrando Desde _MAX_ total de Registros)",
+                        infoPostFix: "",
+                        loadingRecords: "Cargando Datos...",
+                        zeroRecords: "No hubo datos en la busqueda",
+                        paginate: {
+                            previous: "Anterior",
+                            next: "Siguiente",
+                        }
+                    },
+                    responsive: true,
+                    "dom": "<'row'<'col-sm-3'l><'col-sm-6 text-center'B><'col-sm-3'f>>" +
+                            "<'row'<'col-sm-12'tr>>" +
+                            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                    buttons: [
+                        
+                        {
+                            extend: 'excelHtml5',
+                            text: '<i class="fa fa-file-excel-o"></i> Exportar a EXCEL',
+                            title: nombre,
+                            titleAttr: 'Exportar a  Excel'
+                        }
+                    ]
+                });
+                loadingc();
+                $("#modalTablStudents").modal({
+                    show: true
+                })
+                
+            }
+            if (datos[0].response == 0)
+            {
+                loadingc();
+                mensaje("No hubo registros afectados para la consulta");
+            }
+        },
+        error: function (result) {
+            loadingc();
+            mensaje("Intentelo mas tarde");
+            return;
+        }
+    });
+}
+
+function getMunicipio(municipio)
+{
+    var provincia = $("#cbbProvincia").val();
+    if (provincia == "0")
+    {
+        mensaje("Debes de seleccionar una provincia válida.");
+        $("#cbbMunicipio").val()
+        return;
+    }
+
+    loadinga();
+    $.ajax({
+        type: "POST",
+        url: "Default.aspx/getMunicipio",
+        data: "{'provincia':'" + provincia + "'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        processData: false,
+        success: function (response) {
+
+            var datos = (typeof response.d) == 'string' ? eval('(' + response.d + ')') : response.d;
+            if (datos[0].response == 1) {
+                $("#cbbMunicipio").empty().append('<option value="0">-Seleccione-</option>');
+                for (var i in datos)
+                {
+                    $("#cbbMunicipio").append('<option value="' + datos[i].valor + '">' + datos[i].texto + '</option>');
+                }
+                if (municipio != "" && municipio != null && typeof (municipio) != "undefined") {
+                    $("#cbbMunicipio").val(municipio);
+                }
+                else
+                {
+                    $("#cbbMunicipio").val(0);
+                }
+                loadingc();
+            }
+
+
+            //Si no hubo datos en la consulta
+            if (datos[0].response == 6) {
+                loadingc();
+                mensaje(datos[0].mensaje);
+            }
+        },
+        error: function (result) {
+            mensaje('ERROR ' + result.status + ' ' + result.statusText);
+        }
+    });
+}

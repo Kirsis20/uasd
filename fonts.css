@@ -1,0 +1,33 @@
+/******SF COMPACT TEXT - BODY TEXT******/
+@font-face {
+  font-family: 'SFCompactText-Regular';
+  src: url('/SFCompactText-Regular.eot@') format('embedded-opentype'),  url('/SFCompactText-Regular.otf')  format('opentype'),
+	     url('/SFCompactText-Regular.woff') format('woff'), url('/SFCompactText-Regular.ttf')  format('truetype'), url('/SFCompactText-Regular.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+/******SF HEAVY - BOTONES******/
+
+@font-face {
+  font-family: 'SFProDisplay-Heavy';
+  src: url('FProDisplay-Heavy.eot@') format('embedded-opentype'),  url('FProDisplay-Heavy.otf')  format('opentype'),
+	     url('FProDisplay-Heavy.woff') format('woff'), url('FProDisplay-Heavy.ttf')  format('truetype'), url('FProDisplay-Heavy.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+/******SF MDIUM - TITULOS******/
+
+
+@font-face {
+  font-family: 'SFProDisplay-Medium';
+  src: url('SFProDisplay-Medium.eot@') format('embedded-opentype'),  url('SFProDisplay-Medium.otf')  format('opentype'),
+	     url('SFProDisplay-Medium.woff') format('woff'), url('SFProDisplay-Medium.ttf')  format('truetype'), url('SFProDisplay-Medium.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}

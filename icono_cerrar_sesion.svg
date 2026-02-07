@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="62" height="47.857" viewBox="0 0 62 47.857">
+  <g id="icono_cerrar_sesion" transform="translate(-271 -123.143)">
+    <g id="logout-mobile" transform="translate(290.813 124.143)">
+      <path id="Path_1651" data-name="Path 1651" d="M346.735,322.238" transform="translate(-323.984 -310.775)" fill="#fff" stroke="#283340" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.107"/>
+      <path id="Path_1657" data-name="Path 1657" d="M336.171,330.91v-5.469a7.716,7.716,0,0,1,15.284-1.709,7.448,7.448,0,0,1,.18,1.709" transform="translate(-332.321 -317.508)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2"/>
+      <path id="Rectangle_48" data-name="Rectangle 48" d="M338.045,323.348H353.61a4.03,4.03,0,0,1,4.026,4.035V335.7a4.032,4.032,0,0,1-4.026,4.036H338.045a4.03,4.03,0,0,1-4.026-4.036v-8.318A4.029,4.029,0,0,1,338.045,323.348Z" transform="translate(-334.019 -309.899)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_1653" data-name="Path 1653" d="M342.806,327.873a2.672,2.672,0,0,0-.6-.383c-.136-.07-.272-.136-.408-.2-.1-.045-.191-.091-.29-.14l-.039-.021-.041.021c-.095.047-.188.093-.283.136-.138.068-.276.134-.415.2a2.823,2.823,0,0,0-.6.383,2.227,2.227,0,0,0-.533,2.464,3.842,3.842,0,0,0,1.524,1.657v2.2a.34.34,0,1,0,.68,0v-2.2a3.858,3.858,0,0,0,1.532-1.66A2.222,2.222,0,0,0,342.806,327.873Z" transform="translate(-329.747 -306.917)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      <path id="Path_1654" data-name="Path 1654" d="M338.669,326.462l.041,1.152h-.524l.043-1.152-.982.619L337,326.6l1.009-.513-1-.517.247-.465.981.6-.039-1.143h.519l-.039,1.147.975-.61.256.465-1.016.522,1.016.513-.259.476Z" transform="translate(-331.668 -308.938)" fill="#fff"/>
+      <path id="Path_1655" data-name="Path 1655" d="M341.581,326.462l.039,1.152H341.1l.045-1.152-.984.619-.247-.481,1.007-.513-1-.517.249-.465.98.6-.041-1.143h.521l-.041,1.147.977-.61.256.465-1.016.522,1.016.513-.261.476Z" transform="translate(-329.37 -308.938)" fill="#fff"/>
+      <path id="Path_1656" data-name="Path 1656" d="M344.492,326.462l.041,1.152h-.524l.043-1.152-.984.619-.247-.481,1.009-.513-1.005-.517.249-.465.98.6-.041-1.143h.521l-.039,1.147.975-.61.256.465-1.016.522,1.016.513-.259.476Z" transform="translate(-327.073 -308.938)" fill="#fff"/>
+    </g>
+    <text id="Cerrar_Sesión" data-name="Cerrar Sesión" transform="translate(271 169)" fill="#fff" font-size="10" font-family="SFCompactText-Regular, SF Text"><tspan x="0" y="0">Cerrar Sesión</tspan></text>
+  </g>
+</svg>
